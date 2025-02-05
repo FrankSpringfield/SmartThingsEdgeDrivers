@@ -19,6 +19,7 @@ local IASZone = clusters.IASZone
 local capabilities = require "st.capabilities"
 local ZONETYPE = "ZoneType"
 local log = require "log"
+local constants = require "st.zigbee.constants"
 
 local Contact_Switch = 21 -- 0x0015
 local Motion_Sensor = 13 -- 0x000d
@@ -93,6 +94,14 @@ local generate_event_from_zone_status = function(driver, device, zone_status, zb
     else 
       event = capabilities.waterSensor.water.dry(additional_fields)
     end
+  elseif type == Remote_Control or type == Key_Fob or type == Keypad then
+    if zone_status:is_alarm1_set() and zone_status:is_alarm2_set() then
+    event = capabilities.button.button.held(additional_fields)
+    elseif zone_status:is_alarm1_set() then
+      event = capabilities.button.button.pushed(additional_fields)
+    elseif zone_status:is_alarm2_set() then
+      event = capabilities.button.button.double(additional_fields)
+    end
   end
   if event ~= nil then
     device:emit_event_for_endpoint(
@@ -133,7 +142,8 @@ local zigbee_generic_sensor_template = {
   lifecycle_handlers = {
     added = ias_device_added,
     infoChanged = ias_info_changed
-  }
+  },
+  ias_zone_configuration_method = constants.IAS_ZONE_CONFIGURE_TYPE.AUTO_ENROLL_RESPONSE
 }
 
 defaults.register_for_default_handlers(zigbee_generic_sensor_template, zigbee_generic_sensor_template.supported_capabilities)
