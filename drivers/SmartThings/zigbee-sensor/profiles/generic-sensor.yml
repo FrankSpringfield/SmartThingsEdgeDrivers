@@ -1,4 +1,4 @@
-name: ias-generic-sensor
+name: generic-sensor
 components:
 - id: main
   capabilities:

@@ -1,12 +1,12 @@
-name: ias-generic-motion-sensor
+name: generic-waterleak-sensor
 components:
 - id: main
   capabilities:
-  - id: motionSensor
+  - id: waterSensor
     version: 1
   - id: firmwareUpdate
     version: 1
   - id: refresh
     version: 1
   categories:
-  - name: MotionSensor
+  - name: LeakSensor

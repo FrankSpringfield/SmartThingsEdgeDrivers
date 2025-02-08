@@ -1,12 +1,12 @@
-name: ias-generic-waterleak-sensor
+name: generic-contact-sensor
 components:
 - id: main
   capabilities:
-  - id: waterSensor
+  - id: contactSensor
     version: 1
   - id: firmwareUpdate
     version: 1
   - id: refresh
     version: 1
   categories:
-  - name: LeakSensor
+  - name: ContactSensor

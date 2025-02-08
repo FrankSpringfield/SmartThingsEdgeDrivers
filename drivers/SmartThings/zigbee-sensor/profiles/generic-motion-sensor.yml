@@ -1,12 +1,12 @@
-name: ias-generic-contact-sensor
+name: generic-motion-sensor
 components:
 - id: main
   capabilities:
-  - id: contactSensor
+  - id: motionSensor
     version: 1
   - id: firmwareUpdate
     version: 1
   - id: refresh
     version: 1
   categories:
-  - name: ContactSensor
+  - name: MotionSensor

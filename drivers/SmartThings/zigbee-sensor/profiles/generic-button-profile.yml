@@ -1,4 +1,4 @@
-name: ias-generic-button-profile
+name: generic-button-profile
 components:
 - id: main
   capabilities:

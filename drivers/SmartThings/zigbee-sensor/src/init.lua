@@ -28,11 +28,11 @@ local Remote_Control = 271 -- 0x010f
 local Key_Fob = 277 -- 0x0115
 local Keypad = 541 -- 0x021d
 
-local ZIGBEE_GENERIC_SENSOR_PROFILE = "ias-generic-sensor"
-local ZIGBEE_GENERIC_CONTACT_SENSOR_PROFILE = "ias-generic-contact-sensor"
-local ZIGBEE_GENERIC_EMERGENCY_BUTTON_PROFILE = "ias-generic-emergency-button"
-local ZIGBEE_GENERIC_MOTION_SENSOR_PROFILE = "ias-generic-motion-sensor"
-local ZIGBEE_GENERIC_WATERLEAK_SENSOR_PROFILE = "ias-generic-waterleak-sensor"
+local ZIGBEE_GENERIC_SENSOR_PROFILE = "generic-sensor"
+local ZIGBEE_GENERIC_CONTACT_SENSOR_PROFILE = "generic-contact-sensor"
+local ZIGBEE_GENERIC_EMERGENCY_BUTTON_PROFILE = "generic-emergency-button"
+local ZIGBEE_GENERIC_MOTION_SENSOR_PROFILE = "generic-motion-sensor"
+local ZIGBEE_GENERIC_WATERLEAK_SENSOR_PROFILE = "generic-waterleak-sensor"
 
 -- ask device to upload its zone type
 local ias_device_added = function(driver, device)
