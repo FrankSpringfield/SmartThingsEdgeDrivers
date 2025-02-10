@@ -1,4 +1,4 @@
--- Copyright 2025 SmartThings
+-- Copyright 2022 SmartThings
 --
 -- Licensed under the Apache License, Version 2.0 (the "License");
 -- you may not use this file except in compliance with the License.
@@ -20,8 +20,7 @@ local configurationMap = require "configurations"
 local SimpleMetering = clusters.SimpleMetering
 local ElectricalMeasurement = clusters.ElectricalMeasurement
 local preferences = require "preferences"
-
-local log = require "log"
+local BASIC_SWITCH_PROFILE = "basic-switch"
 
 local function lazy_load_if_possible(sub_driver_name)
   -- gets the current lua libs api version
@@ -68,22 +67,11 @@ local function endpoint_to_component(device, ep)
   end
 end
 
-local ep_supports_server_cluster = function(ep)
-  if not ep then return false end
-  for _, cluster in ipairs(ep.server_clusters) do
-    if cluster == clusters.OnOff.ID then
-      return true
-    end
-  end
-  return false
-end
-
 local function find_child(parent, ep_id)
   return parent:get_child_by_parent_assigned_key(string.format("%02X", ep_id))
 end
 
 local function device_init(driver, device)
-  log.info("1***************************************************************")
   device:set_component_to_endpoint_fn(component_to_endpoint)
   device:set_endpoint_to_component_fn(endpoint_to_component)
 
@@ -104,20 +92,24 @@ local function device_init(driver, device)
   
   local num_switch_server_eps = 0
   local main_endpoint = device:get_endpoint(clusters.OnOff.ID)
+  local updated_flag = false
 
   for _, ep in ipairs(device.zigbee_endpoints) do
    
     num_switch_server_eps = num_switch_server_eps + 1
     if ep.id ~= main_endpoint then 
       if device:supports_server_cluster(clusters.OnOff.ID, ep.id) then
+        if updated_flag == false then
+          device:try_update_metadata({profile=BASIC_SWITCH_PROFILE})
+          updated_flag = true
+        end
         if find_child(device, num_switch_server_eps) == nil then
           local name = string.format("%s %d", device.label, num_switch_server_eps)
-          local child_profile = "basic-switch"
           driver:try_create_device(
             {
               type = "EDGE_CHILD",
               label = name,
-              profile = child_profile,
+              profile = BASIC_SWITCH_PROFILE,
               parent_device_id = device.id,
               parent_assigned_child_key = string.format("%02X", num_switch_server_eps),
               vendor_provided_label = name
