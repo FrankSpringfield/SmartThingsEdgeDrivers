@@ -20,11 +20,11 @@ local configurationMap = require "configurations"
 local SimpleMetering = clusters.SimpleMetering
 local ElectricalMeasurement = clusters.ElectricalMeasurement
 local preferences = require "preferences"
+local BASIC_SWITCH_PROFILE = "basic-switch"
 
 local function lazy_load_if_possible(sub_driver_name)
   -- gets the current lua libs api version
   local version = require "version"
-
   -- version 9 will include the lazy loading functions
   if version.api >= 9 then
     return ZigbeeDriver.lazy_load_sub_driver(require(sub_driver_name))
@@ -67,7 +67,11 @@ local function endpoint_to_component(device, ep)
   end
 end
 
-local device_init = function(self, device)
+local function find_child(parent, ep_id)
+  return parent:get_child_by_parent_assigned_key(string.format("%02X", ep_id))
+end
+
+local function device_init(driver, device)
   device:set_component_to_endpoint_fn(component_to_endpoint)
   device:set_endpoint_to_component_fn(endpoint_to_component)
 
@@ -83,7 +87,41 @@ local device_init = function(self, device)
   if ias_zone_config_method ~= nil then
     device:set_ias_zone_config_method(ias_zone_config_method)
   end
+
+  device:set_find_child(find_child)
+  
+  local num_switch_server_eps = 0
+  local main_endpoint = device:get_endpoint(clusters.OnOff.ID)
+  local updated_flag = false
+
+  for _, ep in ipairs(device.zigbee_endpoints) do
+   
+    num_switch_server_eps = num_switch_server_eps + 1
+    if ep.id ~= main_endpoint then 
+      if device:supports_server_cluster(clusters.OnOff.ID, ep.id) then
+        if updated_flag == false then
+          device:try_update_metadata({profile=BASIC_SWITCH_PROFILE})
+          updated_flag = true
+        end
+        if find_child(device, num_switch_server_eps) == nil then
+          local name = string.format("%s %d", device.label, num_switch_server_eps)
+          driver:try_create_device(
+            {
+              type = "EDGE_CHILD",
+              label = name,
+              profile = BASIC_SWITCH_PROFILE,
+              parent_device_id = device.id,
+              parent_assigned_child_key = string.format("%02X", num_switch_server_eps),
+              vendor_provided_label = name
+            }
+          )
+        end
+      end
+    end
+  end
 end
+
+
 
 local zigbee_switch_driver_template = {
   supported_capabilities = {
